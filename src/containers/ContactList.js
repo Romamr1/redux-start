@@ -7,10 +7,25 @@ import { setContact } from '../reducers/selectedContact';
 import Contact from '../components/Contact';
 import AddContact from '../components/AddContact';
 import ContactDetail from '../containers/ContactDetail';
+import getContactsAction from '../action/getContacts';
+import { LOADING_CONTACTS } from '../constants/loading';
+import { isLoaded } from '../reducers/loading';
 
 class ContactList extends Component {
+  componentDidMount() {
+      if (!this.props.isContactLoaded) {
+          this.props.getContacts();
+      }
+
+  }
   render() {
-    const { contacts, value, setContactName, addContact, setSelectedContact, resetContactName } = this.props;
+    const {
+      contacts, value, setContactName, addContact, setSelectedContact, resetContactName
+    } = this.props;
+
+    if (!this.props.isContactLoaded) {
+      return (<div>LOADING . . .</div>);
+    }
     return (
       <div>
         {
@@ -41,6 +56,8 @@ ContactList.propTypes = {
   setContactName: PropTypes.func,
   resetContactName: PropTypes.func,
   setSelectedContact: PropTypes.func,
+  getContacts: PropTypes.func,
+  isContactLoaded: PropTypes.bool,
 };
 
 const mapDispatchToProps = ({
@@ -48,11 +65,13 @@ const mapDispatchToProps = ({
   setContactName: setValue,
   resetContactName: resetValue,
   setSelectedContact: setContact,
+  getContacts: getContactsAction,
 });
 
 const mapStateToProps = state => ({
   contacts: contactsSelector(state),
   value: valueSelector(state),
+  isContactLoaded: isLoaded(state, LOADING_CONTACTS),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ContactList);
